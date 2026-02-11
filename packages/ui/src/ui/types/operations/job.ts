@@ -1,59 +1,8 @@
-import {OperationType} from '../../../shared/yt-types';
 import {Acl, YTError} from '../../types';
 
-export interface RawJobEvent {
-    time: string;
-    state: string;
-    phase?: string;
-}
+import {RawJob, JobStatistics, JobState, RawJobEvent} from '../../../shared/yt-types';
 
-export interface RawJob {
-    address: string;
-    archive_state: string;
-    finish_time?: string;
-    start_time?: string;
-    has_competitors: boolean;
-    has_spec: boolean;
-    job_competition_id: string;
-    operation_id: string;
-    job_id: string;
-    state: JobState;
-    type: OperationType;
-    events: RawJobEvent[];
-    exec_attributes: object;
-    statistics: JobStatistics;
-    monitoring_descriptor?: string;
-    pool_tree?: string;
-    is_stale?: boolean;
-    archive_features?: {has_trace?: boolean};
-    interruption_info?: {
-        interruption_reason: string;
-        interruption_timeout?: number;
-        preempted_for?: {
-            allocation_id?: string;
-            operation_id?: string;
-        };
-        preemption_reason?: string;
-    };
-    error?: YTError;
-}
-
-export type JobState =
-    | 'aborted'
-    | 'aborting'
-    | 'completed'
-    | 'completing'
-    | 'failed'
-    | 'failing'
-    | 'initializing'
-    | 'materializing'
-    | 'pending'
-    | 'preparing'
-    | 'reviving'
-    | 'running'
-    | 'starting'
-    | 'suspended'
-    | 'waiting';
+export type {RawJob, JobStatistics, JobState, RawJobEvent};
 
 export interface CompetitiveJobs {
     archive_job_count: number;
@@ -92,7 +41,6 @@ export interface PreparedJobEvent {
 }
 
 export type JobEvents = PreparedJobEvent[] | undefined;
-export type JobStatistics = object | undefined;
 
 export interface LeafStatistic {
     count: number;

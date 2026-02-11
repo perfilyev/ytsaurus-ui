@@ -1,9 +1,10 @@
 import type {YTError} from '../@types/types';
+import {AuthWay} from './constants/index';
 
-import {RawJob} from '../ytsaurus-ui.ui/types/operations/job';
 import type {DescribedSettings, Stage} from './constants/settings-types';
 import type {UISettings} from './ui-settings';
 
+type MajorMinorPatch = `${number}.${number}.${number}`;
 export type RawVersion = `${MajorMinorPatch}-${string}` | '';
 
 export interface YTConfig {
@@ -145,7 +146,7 @@ export interface ClusterConfig {
     uiSettings?: Partial<Pick<UISettings, 'uploadTableExcelBaseUrl' | 'exportTableBaseurl'>>;
 }
 
-export interface SubRequest<K extends string, T extends BaseBatchParams> {
+export interface SubRequest<K extends string, T> {
     command: K;
     parameters: T;
     setup?: unknown;
@@ -328,6 +329,64 @@ export interface ListJobsResponse {
 
     jobs: Array<ListJobsItem>;
 }
+
+
+export interface RawJob {
+    address: string;
+    archive_state: string;
+    finish_time?: string;
+    start_time?: string;
+    has_competitors: boolean;
+    has_spec: boolean;
+    job_competition_id: string;
+    operation_id: string;
+    job_id: string;
+    state: JobState;
+    type: OperationType;
+    events: RawJobEvent[];
+    exec_attributes: object;
+    statistics: JobStatistics;
+    monitoring_descriptor?: string;
+    pool_tree?: string;
+    is_stale?: boolean;
+    archive_features?: {has_trace?: boolean};
+    interruption_info?: {
+        interruption_reason: string;
+        interruption_timeout?: number;
+        preempted_for?: {
+            allocation_id?: string;
+            operation_id?: string;
+        };
+        preemption_reason?: string;
+    };
+    error?: YTError;
+}
+
+
+export interface RawJobEvent {
+    time: string;
+    state: string;
+    phase?: string;
+}
+
+export type JobState =
+    | 'aborted'
+    | 'aborting'
+    | 'completed'
+    | 'completing'
+    | 'failed'
+    | 'failing'
+    | 'initializing'
+    | 'materializing'
+    | 'pending'
+    | 'preparing'
+    | 'reviving'
+    | 'running'
+    | 'starting'
+    | 'suspended'
+    | 'waiting';
+
+export type JobStatistics = object | undefined;
 
 type InheritedFromRawJob = Pick<
     RawJob,
