@@ -34,25 +34,48 @@ export type ColumnSelectorItem<DataT> = {
 
 type Props<T> = ColumnSelectorModalProps<T>;
 
-type State<T> = Pick<Props<T>, 'items' | 'srcItems'> & {itemsOrder: Array<string>};
+type State<T> = Pick<Props<T>, 'items' | 'srcItems'> & {
+    itemsOrder: Array<string>;
+    contentKey: number;
+};
 
 export default class ColumnSelectorModal<T = never> extends React.Component<Props<T>, State<T>> {
     state: State<T> = {
         srcItems: this.props.srcItems || this.props.items,
         items: makeItemsCopy(this.props.items),
         itemsOrder: this._getItemsOrder(this.props.items),
+        contentKey: 0,
     };
+
+    private contentKeyTimer: ReturnType<typeof setTimeout> | null = null;
 
     // in React 16.3 there is another way to do it: getDerivedStateFromProps;
     // revise this place once received data is managed by Redux
     componentDidUpdate(prevProps: Props<T>) {
-        const {items, srcItems} = this.props;
+        const {items, srcItems, isVisible} = this.props;
         if (prevProps.items !== items || prevProps.srcItems !== srcItems) {
             // don't update itemsOrder
             this.setState({
                 srcItems: srcItems || this.props.items,
                 items: this._getOrderedItems(makeItemsCopy(items)),
             });
+        }
+
+        if (isVisible && !prevProps.isVisible) {
+            this.contentKeyTimer = setTimeout(() => {
+                this.contentKeyTimer = null;
+                this.setState((s) => ({contentKey: s.contentKey + 1}));
+            }, 0);
+        }
+        if (!isVisible && prevProps.isVisible && this.contentKeyTimer !== null) {
+            clearTimeout(this.contentKeyTimer);
+            this.contentKeyTimer = null;
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.contentKeyTimer !== null) {
+            clearTimeout(this.contentKeyTimer);
         }
     }
 
@@ -204,7 +227,7 @@ export default class ColumnSelectorModal<T = never> extends React.Component<Prop
 
         return (
             isVisible && (
-                <div className={b()}>
+                <div key={this.state.contentKey} className={b()}>
                     <div className={b('panel', {left: 'yes'})}>
                         <div className={headingCN}>
                             {i18n('all')} &nbsp;
